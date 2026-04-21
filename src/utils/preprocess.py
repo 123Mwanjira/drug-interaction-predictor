@@ -1,17 +1,15 @@
 from rdkit import Chem
-from rdkit.Chem import rdFingerprintGenerator
+from rdkit.Chem import AllChem
 import numpy as np
 
-def smiles_to_fp(smiles, n_bits=2048):
+def smiles_to_fp(smiles):
     mol = Chem.MolFromSmiles(smiles)
+
     if mol is None:
-        return np.zeros((n_bits,))
+        raise ValueError(f"Invalid SMILES: {smiles}")
 
-    generator = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=n_bits)
-    fp = generator.GetFingerprint(mol)
-
-    arr = np.zeros((n_bits,))
-    for i in range(n_bits):
-        arr[i] = fp[i]
+    fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius=2, nBits=1024)
+    arr = np.zeros((1024,))
+    AllChem.DataStructs.ConvertToNumpyArray(fp, arr)
 
     return arr
